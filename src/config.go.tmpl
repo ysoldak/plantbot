@@ -1,0 +1,40 @@
+package main
+
+import (
+	"machine"
+	"time"
+)
+
+var (
+
+	// - Deep Sleep --------------------------------------------------------------
+
+	deepSleepDuration = 30 * time.Minute
+
+	// - Sensors -----------------------------------------------------------------
+
+	// Battery Sensor
+	batterySensorPin = machine.A3
+
+	// [Soil] Moisture Sensor
+	moistureSensorPin = machine.A0
+
+	// Moisture Sensor 0
+	moistureSensorMin float64 = 23000 // calibrate soil moisture sensor!
+	moistureSensorMax float64 = 51000 // calibrate soil moisture sensor!
+
+	// - WiFi --------------------------------------------------------------------
+
+	// Wifi connectivity
+	wifiSsid = "<wifi access point name>"
+	wifiPass = "<wifi access point password>"
+
+	// - Blynk -------------------------------------------------------------------
+
+	// Setup 0
+	blynkEndpoint                  = "https://fra1.blynk.cloud" // check your region
+	blynkToken                     = "<device token>"
+	blynkNameBatterySensorPercent  = "v0"
+	blynkNameBatterySensorDomain   = "v1"
+	blynkNameMoistureSensorPercent = "v10"
+)
