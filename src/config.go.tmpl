@@ -9,7 +9,7 @@ var (
 
 	// - Deep Sleep --------------------------------------------------------------
 
-	deepSleepDuration = 30 * time.Minute
+	deepSleepDuration = 60 * time.Minute
 
 	// - Sensors -----------------------------------------------------------------
 
@@ -20,8 +20,8 @@ var (
 	moistureSensorPin = machine.A0
 
 	// Moisture Sensor 0
-	moistureSensorMin float64 = 23000 // calibrate soil moisture sensor!
-	moistureSensorMax float64 = 51000 // calibrate soil moisture sensor!
+	moistureSensorMin float64 = 23000 // calibrate soil moisture sensor by setting this or other value to 0!
+	moistureSensorMax float64 = 51000 // calibrate soil moisture sensor by setting this or other value to 0!
 
 	// - WiFi --------------------------------------------------------------------
 

@@ -24,6 +24,10 @@ func main() {
 	batterySensor.configure()
 	moistureSensor.configure()
 
+	if moistureSensorMin == 0 || moistureSensorMax == 0 {
+		calibrate()
+	}
+
 	// Connect to Wifi
 	err := setupWifi(wifiSsid, wifiPass)
 	if err != nil {
@@ -48,7 +52,7 @@ func main() {
 	// Update values at Blynk
 	blynk.updateFloat(blynkNameBatterySensorPercent, bat.percent*100)        // percent charge left
 	blynk.updateFloat(blynkNameBatterySensorDomain, bat.domain)              // inferred cell voltage
-	blynk.updateFloat(blynkNameMoistureSensorPercent, 100-moist.percent*100) // 0 - wet, 100 - dry, so have to inverse
+	blynk.updateFloat(blynkNameMoistureSensorPercent, 100*(1-moist.percent)) // 0 - wet, 100 - dry, so have to inverse
 
 	// Deep sleep
 	sleep()
@@ -63,4 +67,19 @@ func sleep() {
 	stopWifinina() // stop ESP32 wifi co-proc
 	time.Sleep(time.Second)
 	machine.Sleep() // stop main proc
+}
+
+func calibrate() {
+	var min, max uint16
+	for {
+		moist := moistureSensor.read()
+		if min == 0 || min > moist.digital {
+			min = moist.digital
+		}
+		if max == 0 || max < moist.digital {
+			max = moist.digital
+		}
+		println("Moisture sensor (cur, min, max): ", moist.digital, min, max)
+		time.Sleep(time.Second)
+	}
 }
