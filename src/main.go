@@ -46,9 +46,9 @@ func main() {
 	println(now, moist.digital, moist.percent)
 
 	// Update values at Blynk
-	blynk.updateFloat(blynkNameBatterySensorPercent, bat.percent*100)
-	blynk.updateFloat(blynkNameBatterySensorDomain, bat.domain)
-	blynk.updateFloat(blynkNameMoistureSensorPercent, moist.percent*100)
+	blynk.updateFloat(blynkNameBatterySensorPercent, bat.percent*100)        // percent charge left
+	blynk.updateFloat(blynkNameBatterySensorDomain, bat.domain)              // inferred cell voltage
+	blynk.updateFloat(blynkNameMoistureSensorPercent, 100-moist.percent*100) // 0 - wet, 100 - dry, so have to inverse
 
 	// Deep sleep
 	sleep()
