@@ -14,7 +14,7 @@ func main() {
 
 	// This wakes up system from deep sleep later.
 	// We want schedulting to be the first thing to happen on [re]boot to minimise drift.
-	machine.RTC.SetInterrupt(deepSleepDuration.Nanoseconds()+1, false, nil)
+	machine.RTC.SetInterrupt(uint32(deepSleepDuration.Seconds()), false, nil)
 
 	// Indicate wake up
 	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
