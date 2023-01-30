@@ -1,5 +1,13 @@
 package soil
 
+// https://learn.adafruit.com/adafruit-stemma-soil-sensor-i2c-capacitive-moisture-sensor
+// https://www.electrokit.com/en/product/jordfuktighetssensor-kapacitiv-i2c/
+//
+// https://github.com/adafruit/Adafruit-STEMMA-Soil-Sensor-PCB
+//
+// https://github.com/adafruit/Adafruit_Seesaw/blob/master/Adafruit_seesaw.cpp
+// https://github.com/adafruit/Adafruit_BusIO/blob/master/Adafruit_I2CDevice.cpp
+
 import (
 	"time"
 
