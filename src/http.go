@@ -83,20 +83,38 @@ func headersToString(headers map[string]string) (result string) {
 	return
 }
 
+func dialHttp(https bool, server string) (conn net.Conn, err error) {
+	trace(">dialHttp")
+	retries := 3
+	for {
+		if https {
+			conn, err = tls.Dial("tcp", server, nil)
+		} else {
+			conn, err = net.Dial("tcp", server)
+		}
+		if err == nil || retries == 0 {
+			trace("<dialHttp " + strconv.FormatBool(err == nil) + ", " + strconv.FormatBool(retries == 0))
+			return
+		}
+		time.Sleep(1 * time.Second)
+		retries--
+	}
+}
+
 // -----------------------------------------------------------------------------
 
-func (nina *HttpClient) sendHttp(req request, keepAlive bool) (resp response, err error) {
-	conn := nina.connections[req.server]
+func (hc *HttpClient) sendHttp(req request, keepAlive bool) (resp response, err error) {
+	conn := hc.connections[req.server]
 	connNil := strconv.FormatBool(conn == nil)
 	ka := strconv.FormatBool(keepAlive)
 	defer un(trace("sendHttp " + connNil + ", " + ka))
 	if conn == nil {
-		conn, err = nina.dialHttp(req.https, req.server)
+		conn, err = dialHttp(req.https, req.server)
 		if err != nil {
 			trace("sendHttp->dialHttp " + err.Error())
 			return
 		}
-		nina.connections[req.server] = conn
+		hc.connections[req.server] = conn
 	}
 
 	request := []byte{}
@@ -123,52 +141,34 @@ func (nina *HttpClient) sendHttp(req request, keepAlive bool) (resp response, er
 	if err != nil {
 		trace("sendHttp->Write " + err.Error())
 		conn.Close()
-		delete(nina.connections, req.server)
+		delete(hc.connections, req.server)
 		return
 	}
-	n, err := nina.readHttp(conn)
+	n, err := hc.readHttp(conn)
 	if err != nil {
 		trace("sendHttp->readHttp " + err.Error())
 		conn.Close()
-		delete(nina.connections, req.server)
+		delete(hc.connections, req.server)
 		return
 	}
-	resp.bytes = nina.httpBuf[:n]
+	resp.bytes = hc.httpBuf[:n]
 	// println(n)
 	//trace(string(resp.bytes[:12]))
 	// println(string(resp.bytes))
 
 	if !keepAlive {
 		conn.Close()
-		delete(nina.connections, req.server)
+		delete(hc.connections, req.server)
 	}
 
 	return
 }
 
-func (nina *HttpClient) dialHttp(https bool, server string) (conn net.Conn, err error) {
-	trace(">dialHttp")
-	retries := 3
-	for {
-		if https {
-			conn, err = tls.Dial("tcp", server, nil)
-		} else {
-			conn, err = net.Dial("tcp", server)
-		}
-		if err == nil || retries == 0 {
-			trace("<dialHttp " + strconv.FormatBool(err == nil) + ", " + strconv.FormatBool(retries == 0))
-			return
-		}
-		time.Sleep(1 * time.Second)
-		retries--
-	}
-}
-
-func (nina *HttpClient) readHttp(conn net.Conn) (int, error) {
+func (hc *HttpClient) readHttp(conn net.Conn) (int, error) {
 	read := 0
-	timeout := time.Now().Add(nina.timeout)
+	timeout := time.Now().Add(hc.timeout)
 	for {
-		n, err := conn.Read(nina.httpBuf[read:])
+		n, err := conn.Read(hc.httpBuf[read:])
 		if err != nil {
 			return 0, err
 		}

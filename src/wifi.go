@@ -14,6 +14,9 @@ var (
 )
 
 func setupWifi(ssid, pass string) (err error) {
+	if ssid == "" || pass == "" {
+		return nil
+	}
 	configureWifinina()
 	return connectToAP(ssid, pass)
 }

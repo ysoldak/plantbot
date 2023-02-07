@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var (
+const (
 
 	// - Deep Sleep --------------------------------------------------------------
 
@@ -25,15 +25,20 @@ var (
 
 	// - WiFi --------------------------------------------------------------------
 
+	// to disable, leave either empty
+
 	// Wifi connectivity
-	wifiSsid = "<wifi access point name>"
-	wifiPass = "<wifi access point password>"
+	wifiSsid = "" // wifi access point name
+	wifiPass = "" // wifi access point password
 
 	// - Blynk -------------------------------------------------------------------
 
+	// to disable, leave token empty
+
 	// Setup 0
-	blynkEndpoint                  = "https://fra1.blynk.cloud" // check your region
-	blynkToken                     = "<device token>"
+	blynkEndpoint = "https://fra1.blynk.cloud" // check your region on Blynk website
+	blynkToken    = ""                         // device token
+
 	blynkNameBatterySensorPercent  = "v0"
 	blynkNameBatterySensorDomain   = "v1"
 	blynkNameMoistureSensorPercent = "v10"

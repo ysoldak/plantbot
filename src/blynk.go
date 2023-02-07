@@ -25,6 +25,9 @@ func newBlynk() *blynk {
 }
 
 func (b *blynk) updateInt(name string, value int) (err error) {
+	if b.token == "" {
+		return
+	}
 	url := b.server + "/external/api/update?token=" + b.token + "&" + name + "=" + strconv.Itoa(value)
 	req := newGET(url, nil)
 	res, err := b.client.sendHttp(req, false)
@@ -37,6 +40,9 @@ func (b *blynk) updateInt(name string, value int) (err error) {
 }
 
 func (b *blynk) updateFloat(name string, value float64) (err error) {
+	if b.token == "" {
+		return
+	}
 	url := b.server + "/external/api/update?token=" + b.token + "&" + name + "=" + strconv.FormatFloat(value, 'f', 2, 64)
 	req := newGET(url, nil)
 	res, err := b.client.sendHttp(req, false)
@@ -49,6 +55,9 @@ func (b *blynk) updateFloat(name string, value float64) (err error) {
 }
 
 func (b *blynk) sendEvent(name string) (err error) {
+	if b.token == "" {
+		return
+	}
 	url := b.server + "/external/api/logEvent?token=" + b.token + "&code=" + name
 	req := newGET(url, nil)
 	res, err := b.client.sendHttp(req, false)
