@@ -24,6 +24,7 @@ func main() {
 	batterySensor.configure()
 	moistureSensor.configure()
 
+	// Calibrate moisture sensor, optional
 	if moistureSensorMin == 0 || moistureSensorMax == 0 {
 		calibrate()
 	}
