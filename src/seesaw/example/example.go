@@ -1,5 +1,8 @@
 package main
 
+// RP2040
+// red 2, blue 8, green 9, gray 14
+
 import (
 	"machine"
 	"plantbot/src/seesaw/soil"
