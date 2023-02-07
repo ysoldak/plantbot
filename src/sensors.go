@@ -33,8 +33,11 @@ var batterySensor = sensor{
 	pin: batterySensorPin,
 	min: batSensorMin,
 	max: batSensorMax,
-	domain: func(digital uint16, analog float64, percent float64) float64 {
-		return analog / (batSensorAnalogDiv * batCellCnt)
+	domain: func(sr sensorReading) float64 {
+		return sr.analog / (batSensorAnalogDiv * batCellCnt)
+	},
+	percent: func(sr sensorReading) float64 {
+		return 100 * sr.fraction
 	},
 }
 
@@ -45,6 +48,9 @@ var moistureSensor = sensor{
 	min:    moistureSensorMin,
 	max:    moistureSensorMax,
 	domain: nil,
+	percent: func(sr sensorReading) float64 {
+		return 100 * (1 - sr.fraction) // 0 - wet, 100 - dry, so have to inverse
+	},
 }
 
 // -----------------------------------------------------------------------------
@@ -54,16 +60,16 @@ type sensor struct {
 	min float64
 	max float64
 
-	domain func(digital uint16, analog float64, percent float64) float64
+	domain  func(sr sensorReading) float64
+	percent func(sr sensorReading) float64
 
 	adc machine.ADC
 }
 
 type sensorReading struct {
-	digital uint16
-	analog  float64
-	percent float64
-	domain  float64
+	digital  uint16
+	analog   float64
+	fraction float64
 }
 
 func (s *sensor) configure() {
@@ -76,10 +82,7 @@ func (s *sensor) read() (sr sensorReading) {
 	sr.digital = s.adc.Get()
 	sr.analog = float64(sr.digital) * digitalToAnalog
 	if float64(sr.digital) > s.min {
-		sr.percent = (float64(sr.digital) - s.min) / (s.max - s.min)
-	}
-	if s.domain != nil {
-		sr.domain = s.domain(sr.digital, sr.analog, sr.percent)
+		sr.fraction = (float64(sr.digital) - s.min) / (s.max - s.min)
 	}
 	return
 }

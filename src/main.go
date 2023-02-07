@@ -46,13 +46,13 @@ func main() {
 
 	// Some tracing
 	now := time.Now().Format(time.RFC3339)
-	println(now, bat.digital, bat.analog, bat.percent, bat.domain)
-	println(now, moist.digital, moist.percent)
+	println(now, bat.digital, bat.analog, bat.fraction)
+	println(now, moist.digital, moist.fraction)
 
 	// Update values at Blynk
-	blynk.updateFloat(blynkNameBatterySensorPercent, bat.percent*100)        // percent charge left
-	blynk.updateFloat(blynkNameBatterySensorDomain, bat.domain)              // inferred cell voltage
-	blynk.updateFloat(blynkNameMoistureSensorPercent, 100*(1-moist.percent)) // 0 - wet, 100 - dry, so have to inverse
+	blynk.updateFloat(blynkNameBatterySensorPercent, batterySensor.percent(bat))     // percent charge left
+	blynk.updateFloat(blynkNameBatterySensorDomain, batterySensor.domain(bat))       // inferred cell voltage
+	blynk.updateFloat(blynkNameMoistureSensorPercent, moistureSensor.percent(moist)) // 0% - air, 100% - water
 
 	// Deep sleep
 	sleep()
