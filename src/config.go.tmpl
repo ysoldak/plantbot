@@ -20,9 +20,34 @@ const (
 	// [Soil] Moisture Sensor
 	moistureSensorPin = machine.A0
 
+	// Moisture Sensor Calibration
+	// moistureSensorMin float64 = 0
+	// moistureSensorMax float64 = 0
+
 	// Moisture Sensor 0
 	moistureSensorMin float64 = 23000 // calibrate soil moisture sensor by setting this or other value to 0!
 	moistureSensorMax float64 = 51000 // calibrate soil moisture sensor by setting this or other value to 0!
+
+	// - Pump --------------------------------------------------------------------
+
+	// to disable, set PWM and/or Power pins to machine.NoPin
+
+	// Power pin will be High/Low for the pump duration + pwm delay -- for simple motor control or use with MOSFET, see below
+	// PWM pin sends encoded PWM signal -- use this to drive a brusless motor via ESC or brushed motor at desired speed
+
+	// Use both pins for most efficient setup with MOSFET like this https://www.amazon.se/dp/B07DK7T997
+	// Alternatively just one of them or neither if your setup does not have a pump
+
+	pumpPowerPin = machine.D2
+
+	pumpPwmPin     = machine.D3      // pin connected to ESC
+	pumpPwmPeriod  = 20000           // in microseconds, 20ms is standard PWM period (50Hz) for ESCs and servos
+	pumpPwmDutyOff = 1000            // in microseconds, must be 1000us for ESCs and servos; zero otherwise
+	pumpPwmDutyRun = 1300            // in microseconds, from 1000us to 2000us for ESCs and servos
+	pumpPwmDelay   = 3 * time.Second // delay PWM signal and give ESC time to initialize after power on
+
+	pumpRunDuration = 5 * time.Second
+	pumpThreshold   = 60 // trigger pump when soil humidity percent is below this; returned by percent() func of moisture sensor
 
 	// - WiFi --------------------------------------------------------------------
 

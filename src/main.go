@@ -46,6 +46,10 @@ func main() {
 	blynk := newBlynk()
 	blynk.sendEvent("CONNECT")
 
+	// Init pump
+	pump := newPump()
+	pump.configure()
+
 	for {
 		led.High()
 
@@ -66,6 +70,14 @@ func main() {
 		blynk.updateFloat(blynkNameBatterySensorPercent, batPercent)    // percent charge left
 		blynk.updateFloat(blynkNameBatterySensorCellVolt, batCellVolt)  // inferred cell voltage
 		blynk.updateFloat(blynkNameMoistureSensorPercent, moistPercent) // 0% - air, 100% - water
+
+		// Pump water when needed
+		if moistPercent < pumpThreshold {
+			// do pumping
+			pump.work()
+			// notify Blynk
+			blynk.sendEvent("PUMP")
+		}
 
 		// Either light or deep sleep
 		sleep()
