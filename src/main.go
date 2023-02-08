@@ -14,19 +14,24 @@ func main() {
 
 	// This wakes up system from deep sleep later.
 	// We want schedulting to be the first thing to happen on [re]boot to minimise drift.
-	machine.RTC.SetInterrupt(uint32(deepSleepDuration.Seconds()), false, nil)
+	if sleepDeep {
+		machine.RTC.SetInterrupt(uint32(sleepDuration.Seconds()), false, nil)
+	}
 
 	// Indicate wake up
 	led.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	led.High()
 
 	// Init sensors
+	batterySensor := newBatterySensor()
 	batterySensor.configure()
+
+	moistureSensor := newMoistureSensor()
 	moistureSensor.configure()
 
 	// Calibrate moisture sensor, optional
 	if moistureSensorMin == 0 || moistureSensorMax == 0 {
-		calibrate()
+		moistureSensor.calibrate() // locks forever; shall adjust config and re-flash
 	}
 
 	// Connect to Wifi
@@ -41,46 +46,44 @@ func main() {
 	blynk := newBlynk()
 	blynk.sendEvent("CONNECT")
 
-	// Read sensors
-	bat := batterySensor.read()
-	moist := moistureSensor.read()
+	for {
+		led.High()
 
-	// Some tracing
-	now := time.Now().Format(time.RFC3339)
-	println(now, bat.digital, bat.analog, bat.fraction)
-	println(now, moist.digital, moist.fraction)
+		// Read sensors
+		bat := batterySensor.read()
+		batPercent := batterySensor.percent()
+		batCellVolt := batterySensor.cellVoltage()
 
-	// Update values at Blynk
-	blynk.updateFloat(blynkNameBatterySensorPercent, batterySensor.percent(bat))     // percent charge left
-	blynk.updateFloat(blynkNameBatterySensorDomain, batterySensor.domain(bat))       // inferred cell voltage
-	blynk.updateFloat(blynkNameMoistureSensorPercent, moistureSensor.percent(moist)) // 0% - air, 100% - water
+		moist := moistureSensor.read()
+		moistPercent := moistureSensor.percent()
 
-	// Deep sleep
-	sleep()
+		// Some tracing
+		now := time.Now().Format(time.RFC3339)
+		println(now, bat.digital, bat.analog, batPercent, batCellVolt)
+		println(now, moist.digital, moistPercent)
 
-	// Reboot after deep sleep since we can't yet wake up correctly
-	arm.SystemReset()
+		// Update values at Blynk
+		blynk.updateFloat(blynkNameBatterySensorPercent, batPercent)    // percent charge left
+		blynk.updateFloat(blynkNameBatterySensorCellVolt, batCellVolt)  // inferred cell voltage
+		blynk.updateFloat(blynkNameMoistureSensorPercent, moistPercent) // 0% - air, 100% - water
+
+		// Either light or deep sleep
+		sleep()
+	}
 }
 
 func sleep() {
+	led.Low() // turn off led to indicate sleep state
+
+	if !sleepDeep {
+		println("Light sleep for 5 seconds")
+		time.Sleep(sleepDuration)
+		return
+	}
+
 	println("Deep sleep")
-	led.Low()      // turn off led to indicate sleep state
 	stopWifinina() // stop ESP32 wifi co-proc
 	time.Sleep(time.Second)
-	machine.Sleep() // stop main proc
-}
-
-func calibrate() {
-	var min, max uint16
-	for {
-		moist := moistureSensor.read()
-		if min == 0 || min > moist.digital {
-			min = moist.digital
-		}
-		if max == 0 || max < moist.digital {
-			max = moist.digital
-		}
-		println("Moisture sensor (cur, min, max): ", moist.digital, min, max)
-		time.Sleep(time.Second)
-	}
+	machine.Sleep()   // stop main proc
+	arm.SystemReset() // reboot after deep sleep since we can't yet wake up correctly
 }

@@ -7,9 +7,10 @@ import (
 
 const (
 
-	// - Deep Sleep --------------------------------------------------------------
+	// - Sleep -------------------------------------------------------------------
 
-	deepSleepDuration = 60 * time.Minute
+	sleepDuration = 5 * time.Second
+	sleepDeep     = false
 
 	// - Sensors -----------------------------------------------------------------
 
@@ -40,6 +41,6 @@ const (
 	blynkToken    = ""                         // device token
 
 	blynkNameBatterySensorPercent  = "v0"
-	blynkNameBatterySensorDomain   = "v1"
+	blynkNameBatterySensorCellVolt = "v1"
 	blynkNameMoistureSensorPercent = "v10"
 )
